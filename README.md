@@ -114,3 +114,101 @@ resources/ arquivos de front-end
 routes/ todas as rotas web e console, como é um mvc (model view controller) o segundo parâmetro da rota deve ser um controller
 storage/ onde guarda todos os arquivos extras, logs, cache e arquivos do projeto que n estiverem no S3 pode ficar aqui tbm
 composer.json = package.json só q do php
+
+
+**Vamos criar o controller**
+php artisan make:controller
+o primeiro vai ser do tipo invokable
+e em routes>web vamos mudar a rota get / para WelcomeController::class
+```bash
+use App\Http\Controllers\WelcomeController;
+
+Route::get('/', WelcomeController::class);
+```
+
+e no WelcomeController
+```bash
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class WelcomeController extends Controller
+{
+    public function __invoke(Request $request)
+    {
+        return view('welcome');
+    }
+}
+
+```
+**Note**: A função view('Path') recebe o path com relação ao arquivo resources/view e pega o file-name.blade.php
+**Note2**: blade é um sistema de template para o php, dentro do blade temos alguns poderes a mais do que teríamos trabalhando com um arquivo .php. Exemplo:em um arquivo blade não precisamos abrir o 
+<?php ?>, podemos apenas passar @ na frente  e fechar depois além de {{}} para usar o echo. Podemos criar as nossas próprias diretivas tbm e o lavável ja traz varias
+
+
+quando o __invoke está em uma controller, isso quer dizer que não tem mais nenhum método dentro da classe, ou seja, é uma classe de instancia única, toda vez que ela for inicializada ela vai trazer o __invoke
+
+Se ela não for um __invoke devemos passar um array no arquivo de rotas assim
+```bash
+Route::get('/', [WelcomeController::class, 'nome do método']);
+```
+
+**Arquivos de classes no php começam com letra maiúscula**
+
+Podemos descobrir como é a estrutura dos models usando 
+```bash
+php artisan model:show User
+```
+
+podemos fazer 
+var_dump($user)
+
+dump($user)
+die()
+
+ou dd($user) do lavável
+
+**Criando dados no banco de dados usando um controller**
+```bash
+class WelcomeController extends Controller
+{
+    public function __invoke(Request $request)
+    {
+        User::query()->create([
+            'name' => 'user name',
+            'email' => 'email@email.com',
+            'password' => 'user name',
+        ]);
+    }
+}
+```
+
+**Atualizando dados no banco usando um controller**
+Existem 2 formas
+1)
+```bash
+$user->email_verified_at = now();
+$user->save()
+```
+2)
+```bash
+$user->update(['email_verified_at' => now()])
+```
+A primeira foram pode atualizar todos os dados
+a segunda forma e a forma que criamos o User no banco só podem ser usadas para atualizar ou criar as propriedades $fillable, é uma forma de assegurar que não vai atualizar em massa uma propriedade que não deve.
+
+
+## LiveWire
+Permite criar componentes dinâmicos usando apenas php enquanto executa a logica de controle no lado do servidor.
+```bash
+composer require livewire/livewire
+```
+```bash
+php artisan livewire:layout
+```
+criar o arquivo de componente
+```bah
+php artisan livewire:make Teste
+```
