@@ -323,7 +323,7 @@ php artisan make:model
 // Nesse caso vamos criar uma factory, migration com nome de Project
 ```
 
-Vamos na migration primeiro
+Vamos na **migration** primeiro
 
 ```bash
   public function up(): void
@@ -341,7 +341,7 @@ Vamos na migration primeiro
   }
 ```
 
-Vamos criar a factory
+Vamos criar a **factory**
 Como created_by => User::factory() vamos criar 210 usuários pois vamos criar 10 projects na seed
 
 ```bash
@@ -358,7 +358,7 @@ Como created_by => User::factory() vamos criar 210 usuários pois vamos criar 10
   }
 ```
 
-Para essa factory funcionar vamos precisar do método casts criado em model
+Para essa factory funcionar vamos precisar do método casts criado em **model**
 
 ```bash
   public function casts()
@@ -367,7 +367,7 @@ Para essa factory funcionar vamos precisar do método casts criado em model
   }
 ```
 
-Seed
+**Seed**
 
 ```bash
 class DatabaseSeeder extends Seeder
@@ -382,3 +382,62 @@ class DatabaseSeeder extends Seeder
 ```
 
 Para não criar mais 10 usuários vamos fazer o seguinte
+
+```bash
+  public function run(): void
+  {
+
+    User::factory()->count(200)->create();
+
+    User::query()->inRandomOrder()->limit(10)->get()
+      ->each(fn(User $u) => Project::factory()
+        ->create(['created_by' => $u->id]));
+  }
+}
+
+```
+
+## Vamos criar o model de proposal
+
+factory e migration
+
+```bash
+php artisan make:model
+```
+
+Vamos começar no arquivo de migrations novamente
+
+```bash
+  public function up(): void
+  {
+    Schema::create('proposals', function (Blueprint $table) {
+      $table->id();
+      $table->string('email');
+      $table->unsignedSmallInteger('hours');
+      $table->foreignIdFor(Project::class)->constrained();
+      $table->timestamps();
+    });
+  }
+```
+
+Agora na factory
+
+```bash
+class ProposalFactory extends Factory
+{
+  public function definition(): array
+  {
+    return [
+      'email' => fake()->safeEmail(),
+      'hours' => fake()->numberBetween(1, 120),
+      'project_id' => Project::factory(),
+    ];
+  }
+}
+```
+
+Agora na seed
+
+```bash
+
+```
