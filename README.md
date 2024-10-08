@@ -65,8 +65,8 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-
 ## Notes
+
 A documentação do Laravel é mt boa
 Vamos usar o Laravel como framework
 https://herd.laravel.com/
@@ -80,7 +80,6 @@ O request chega do client para o server | o server vai receber no serviço de we
 
 para n usar o Nginx o próprio php tem o server dele q pode ser executado por php -S localhost:8888 index.php
 
-
 Para trabalharmos com objetos no PHP usamos -> no lugar de . como é no js
 toda variável começa com $
 // O fato de declarar variável com $ eu não gostei pois eu posso mudar o valor de algo que talvez eu queria que seja uma const, n posso mudar o escopo da variável coisa que da para fazer no node com const, let e var.
@@ -91,10 +90,10 @@ laravel new
 no composer.json o autoload tem name space ou seja conseguimos dizer o caminho que cada classe tem dentro do projeto
 autoload psr-4 'App\\': 'app/' mapeia tudo que tiver App para app/
 
-
 ## 1.0
+
 Digitamos
-php artisan 
+php artisan
 para ver os comandos do artisan
 
 php artisan serve
@@ -104,22 +103,21 @@ php artisan make:model
 php artisan route:list
 php artisan about //Ele pega essas informações do .env
 
-
 **Diretórios**
 app/ a maior parte do código de negocio
 bootstrap/ onde tudo se inicia, podemos passar configs extras aqui
-config/ 
+config/
 public/ quando um request chega ele procura o index.php (lida com requests) dentro dessa pasta, é onde inicializa o projeto (aqui que busca o bootstrap)
 resources/ arquivos de front-end
 routes/ todas as rotas web e console, como é um mvc (model view controller) o segundo parâmetro da rota deve ser um controller
 storage/ onde guarda todos os arquivos extras, logs, cache e arquivos do projeto que n estiverem no S3 pode ficar aqui tbm
 composer.json = package.json só q do php
 
-
 **Vamos criar o controller**
 php artisan make:controller
 o primeiro vai ser do tipo invokable
 e em routes>web vamos mudar a rota get / para WelcomeController::class
+
 ```bash
 use App\Http\Controllers\WelcomeController;
 
@@ -127,6 +125,7 @@ Route::get('/', WelcomeController::class);
 ```
 
 e no WelcomeController
+
 ```bash
 <?php
 
@@ -143,26 +142,29 @@ class WelcomeController extends Controller
 }
 
 ```
+
 **Note**: A função view('Path') recebe o path com relação ao arquivo resources/view e pega o file-name.blade.php
-**Note2**: blade é um sistema de template para o php, dentro do blade temos alguns poderes a mais do que teríamos trabalhando com um arquivo .php. Exemplo:em um arquivo blade não precisamos abrir o 
+**Note2**: blade é um sistema de template para o php, dentro do blade temos alguns poderes a mais do que teríamos trabalhando com um arquivo .php. Exemplo:em um arquivo blade não precisamos abrir o
+
 <?php ?>, podemos apenas passar @ na frente  e fechar depois além de {{}} para usar o echo. Podemos criar as nossas próprias diretivas tbm e o lavável ja traz varias
 
+quando o **invoke está em uma controller, isso quer dizer que não tem mais nenhum método dentro da classe, ou seja, é uma classe de instancia única, toda vez que ela for inicializada ela vai trazer o **invoke
 
-quando o __invoke está em uma controller, isso quer dizer que não tem mais nenhum método dentro da classe, ou seja, é uma classe de instancia única, toda vez que ela for inicializada ela vai trazer o __invoke
+Se ela não for um \_\_invoke devemos passar um array no arquivo de rotas assim
 
-Se ela não for um __invoke devemos passar um array no arquivo de rotas assim
 ```bash
 Route::get('/', [WelcomeController::class, 'nome do método']);
 ```
 
 **Arquivos de classes no php começam com letra maiúscula**
 
-Podemos descobrir como é a estrutura dos models usando 
+Podemos descobrir como é a estrutura dos models usando
+
 ```bash
 php artisan model:show User
 ```
 
-podemos fazer 
+podemos fazer
 var_dump($user)
 
 dump($user)
@@ -171,6 +173,7 @@ die()
 ou dd($user) do lavável
 
 **Criando dados no banco de dados usando um controller**
+
 ```bash
 class WelcomeController extends Controller
 {
@@ -187,28 +190,195 @@ class WelcomeController extends Controller
 
 **Atualizando dados no banco usando um controller**
 Existem 2 formas
-1)
+
+1.
+
 ```bash
 $user->email_verified_at = now();
 $user->save()
 ```
-2)
+
+2.
+
 ```bash
 $user->update(['email_verified_at' => now()])
 ```
+
 A primeira foram pode atualizar todos os dados
 a segunda forma e a forma que criamos o User no banco só podem ser usadas para atualizar ou criar as propriedades $fillable, é uma forma de assegurar que não vai atualizar em massa uma propriedade que não deve.
 
-
 ## LiveWire
+
 Permite criar componentes dinâmicos usando apenas php enquanto executa a logica de controle no lado do servidor.
+
 ```bash
 composer require livewire/livewire
 ```
+
 ```bash
 php artisan livewire:layout
 ```
+
 criar o arquivo de componente
+
 ```bah
 php artisan livewire:make Teste
 ```
+
+## Desenvolver as funcionalidades
+
+Vamos começar com o banco de dados
+https://dbdiagram.io/
+
+```bash
+Table users {
+  id pk [primary key, increment]
+  name string
+  email string
+  avatar string
+  rating int
+}
+
+Table projects {
+  id pk [primary key, increment]
+  title string
+  description string
+  created_at datetime
+  ends_at datatime
+  status string
+  tech_stack json
+  created_by fk [ref: < users.id]
+}
+
+Table proposals {
+  id pk [primary key, increment]
+  email string
+  hours int
+  project_id fk [ref: < projects.id]
+}
+```
+
+agora vamos em database > migrations > create_users, quando o projeto estiver em produção não vamos mexer nas migrations antigas e sim criar novas.
+
+O user tem uma trait HasFactory definida no model user, isso faz com que todos os modos de Factory sejam herdados dentro da classe.
+
+**Note:** Como o User HasFactory ele vai procurar pelo nome da classe seguido de Factory no caso UserFactory
+**Note2:** Nome das tabelas deve ser o plural do nome do model
+
+**Factory:** é a definição um padrão de como criar um registro
+database>factories>UserFactory.php
+
+```bash
+<?php
+
+namespace Database\Factories;
+
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class UserFactory extends Factory
+{
+    public function definition(): array
+    {
+        return [
+            'name' => fake()->name(),
+            'email' => fake()->unique()->safeEmail(),
+            'rating' => fake()->randomElement([1,2,3,4,5]),
+            'avatar' => 'https://avatar.iran.liara.run/public',
+        ];
+    }
+}
+```
+
+**Seeders**
+database>seeders>DatabaseSeeder.php
+
+```bash
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+    public function run(): void
+    {
+
+        User::factory()->count(200)->create();
+    }
+}
+```
+
+Agora vamos limpar o banco e rodar a seed fazendo
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+## Criando outros models e tables
+
+```bash
+php artisan make:model
+// Nesse caso vamos criar uma factory, migration com nome de Project
+```
+
+Vamos na migration primeiro
+
+```bash
+  public function up(): void
+  {
+    Schema::create('projects', function (Blueprint $table) {
+      $table->id();
+      $table->string('title');
+      $table->text('description');
+      $table->dateTime('ends_at');
+      $table->string('status')->default('open');
+      $table->json('tech_stack');
+      $table->foreignIdFor(User::class, 'created_by')->constrained('users');
+      $table->timestamps();
+    });
+  }
+```
+
+Vamos criar a factory
+Como created_by => User::factory() vamos criar 210 usuários pois vamos criar 10 projects na seed
+
+```bash
+  public function definition(): array
+  {
+    return [
+      'title' => collect(fake()->words(5))->join(' '),
+      'description' => fake()->randomHtml(),
+      'ends_at' => fake()->dateTimeBetween('now', '+ 3 days'),
+      'status' => fake()->randomElement(['open', 'closed']),
+      'tech_stack' => fake()->randomElements(['react', 'php', 'laravel', 'vue', 'tailwind', 'javascript', 'nextjs', 'python'], random_int(1, 5)),
+      'created_by' => User::factory(),
+    ];
+  }
+```
+
+Para essa factory funcionar vamos precisar do método casts criado em model
+
+```bash
+  public function casts()
+  {
+    return ['tech_stack' => 'array'];
+  }
+```
+
+Seed
+
+```bash
+class DatabaseSeeder extends Seeder
+{
+  public function run(): void
+  {
+
+    User::factory()->count(200)->create();
+    Project::factory()->count(10)->create();
+  }
+}
+```
+
+Para não criar mais 10 usuários vamos fazer o seguinte
