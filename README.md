@@ -64,3 +64,53 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+
+## Notes
+A documentação do Laravel é mt boa
+Vamos usar o Laravel como framework
+https://herd.laravel.com/
+https://laravel.com/
+
+Para estudo:
+https://bootcamp.laravel.com/
+
+O php é uma linguagem interpretada (n precisa passar pelo processo de build), quem executa os arquivos .php é o próprio php
+O request chega do client para o server | o server vai receber no serviço de web service, a maior parte das vezes Nginx que vai executar o arquivo php que vai retornar para o Nginx que retorna para o client
+
+para n usar o Nginx o próprio php tem o server dele q pode ser executado por php -S localhost:8888 index.php
+
+
+Para trabalharmos com objetos no PHP usamos -> no lugar de . como é no js
+toda variável começa com $
+// O fato de declarar variável com $ eu não gostei pois eu posso mudar o valor de algo que talvez eu queria que seja uma const, n posso mudar o escopo da variável coisa que da para fazer no node com const, let e var.
+var_dump() = console.log
+
+laravel new
+
+no composer.json o autoload tem name space ou seja conseguimos dizer o caminho que cada classe tem dentro do projeto
+autoload psr-4 'App\\': 'app/' mapeia tudo que tiver App para app/
+
+
+## 1.0
+Digitamos
+php artisan 
+para ver os comandos do artisan
+
+php artisan serve
+para ligar na porta 8000
+
+php artisan make:model
+php artisan route:list
+php artisan about //Ele pega essas informações do .env
+
+
+**Diretórios**
+app/ a maior parte do código de negocio
+bootstrap/ onde tudo se inicia, podemos passar configs extras aqui
+config/ 
+public/ quando um request chega ele procura o index.php (lida com requests) dentro dessa pasta, é onde inicializa o projeto (aqui que busca o bootstrap)
+resources/ arquivos de front-end
+routes/ todas as rotas web e console, como é um mvc (model view controller) o segundo parâmetro da rota deve ser um controller
+storage/ onde guarda todos os arquivos extras, logs, cache e arquivos do projeto que n estiverem no S3 pode ficar aqui tbm
+composer.json = package.json só q do php
