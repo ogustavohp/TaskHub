@@ -439,5 +439,202 @@ class ProposalFactory extends Factory
 Agora na seed
 
 ```bash
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Project;
+use App\Models\Proposal;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+  public function run(): void
+  {
+
+    User::factory()->count(200)->create();
+
+    User::query()->inRandomOrder()->limit(10)->get()
+      ->each(function (User $u) {
+        $project = Project::factory()
+          ->create(['created_by' => $u->id]);
+
+        Proposal::factory()->count(random_int(4, 45))->create(['project_id' => $project->id]);
+      });
+  }
+}
 
 ```
+
+## Front-end
+
+Vamos ter 4 componentes LiveWire
+Propriedades computadas nos precisamos usar o this no liveWire, propriedades que não são computadas não usamos o this no componente liveWire
+vamos criar o ProjectsController
+
+```bash
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Project;
+
+class ProjectsController extends Controller
+{
+  public function index()
+  {
+    return view('projects.index');
+  }
+
+  public function show(Project $project)
+  {
+    return view('projects.show', compact('project'));
+  }
+}
+```
+
+Vamos cadastrar as rotas no routes/web.php usando o ProjectsController
+
+```bash
+<?php
+
+use App\Http\Controllers\ProjectsController;
+use Illuminate\Support\Facades\Route;
+
+
+Route::get('/', [ProjectsController::class, 'index'])->name('projects.index');
+
+Route::get('project/{project}', [ProjectsController::class, 'show'])->name('projects.show');
+```
+
+Criamos em app>livewire>projects>index.php e show.php a classe do index e show
+
+//index.php onde projects tem #[Computed()]
+
+```bash
+<?php
+
+namespace App\Livewire\Projects;
+
+use App\Models\Project;
+use Livewire\Attributes\Computed;
+use Livewire\Component;
+
+class Index extends Component
+{
+  public function render()
+  {
+    return view('livewire.projects.index');
+  }
+
+  #[Computed()]
+  public function projects()
+  {
+    return Project::query()->inRandomOrder()->get();
+  }
+}
+```
+
+//Show.php
+
+```bash
+<?php
+
+namespace App\Livewire\Projects;
+
+use App\Models\Project;
+use Livewire\Component;
+
+class Show extends Component
+{
+  public Project $project;
+
+  public function render()
+  {
+    return view('livewire.projects.show');
+  }
+}
+
+```
+
+no componente liveWire de show que vai usar o parâmetro da rota
+
+```bash
+<div>
+    Componente livewire projectshow
+
+    @dump($project)
+</div>
+```
+
+e em projects show.blade.php
+
+```bash
+<x-layouts.app>
+  <livewire:projects.show :project="$project" />
+</x-layouts.app>
+```
+
+Isso faz que $project possa ser acessado de forma dinâmica no componente show.blade.php e $project ja vai ser o projeto com o id da url pq definimos isso no controller
+
+```bash
+  public function show(Project $project)
+  {
+    return view('projects.show', compact('project'));
+  }
+```
+
+passando modulo de Project $project para a view projects.show
+
+## Vamos fazer apenas o de proposals agora para ficar mais explicado
+
+```bash
+php artisan livewire:make
+```
+
+Vamos chamar de projects.proposals
+
+No `app>Livewire>projects>Proposals.php` vamos colocar o metodo Project $project
+
+```bash
+<?php
+
+namespace App\Livewire\Projects;
+
+use App\Models\Project;
+use Livewire\Component;
+
+class Proposals extends Component
+{
+  public Project $project;
+
+  public function render()
+  {
+    return view('livewire.projects.proposals');
+  }
+}
+```
+
+Agora em resources>projects>show.blade.php (a pagina) vamos adicionar o componente livewire assim
+
+```bash
+<x-layouts.app>
+  <livewire:projects.show :$project />
+  <livewire:projects.proposals :$project />
+</x-layouts.app>
+```
+
+Agora basta estilizar o componente livewire
+{!! !!}Faz o blade retornar o html e não em texto
+
+```bash
+<div>
+  <pre>
+    {{$project->title}}
+    {!!$project->description!!}   {{-- para vir em html --}}
+  </pre>
+</div>
+```
+
+Vamos usar o tailwind
