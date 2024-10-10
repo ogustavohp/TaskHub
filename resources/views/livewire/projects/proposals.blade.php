@@ -1,3 +1,1 @@
-<div>
-hihi
-</div>
+<x-proposals :proposals="$project->proposals" />
