@@ -639,3 +639,52 @@ Agora basta estilizar o componente livewire
 
 Vamos usar o tailwind
 alpinejs + livewire
+
+Para mostrar a hora certa e ficar atualizando (via requests no back-end q n é a melhor escolha fazemos o seguinte)
+no model timer
+
+```bash
+<?php
+
+namespace App\Livewire\Projects;
+
+use App\Models\Project;
+use Livewire\Component;
+
+class Timer extends Component
+{
+  public Project $project;
+
+  public function render()
+  {
+    $diff = now()->diff($this->project->ends_at);
+    return view(
+      'livewire.projects.timer',
+      [
+        'days' => $diff->d,
+        'hours' => $diff->h,
+        'minutes' => $diff->i,
+        'seconds' => $diff->s
+      ]
+    );
+  }
+}
+```
+
+no componente timer, o wire:poll.1s garante que vai fazer 1 request a cada 1 segundo
+eu prefiro não fazer isso e na verdade fazer o front-end receber o dia que termina e o front ficar por conta da logica para não ficar mandando 1 request por segundo para o backend
+
+```bash
+<div>
+  <div class="flex items-center justify-between mt-4 text-[14px]" wire:poll.1s>
+    <div class="text-[#8C8C9A]  leading-6">Encerra em:</div>
+    <div class="font-bold flex items-center space-x-1">
+      <span class="text-white ">{{ $days }}</span><span>:</span>
+      <span class="text-white ">{{ $hours }}</span><span>:</span>
+      <span class="text-white ">{{ $minutes }}</span><span>:</span>
+      <span class="text-white ">{{ $seconds }}</span>
+    </div>
+  </div>
+</div>
+
+```
