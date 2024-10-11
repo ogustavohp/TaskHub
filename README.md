@@ -638,3 +638,4 @@ Agora basta estilizar o componente livewire
 ```
 
 Vamos usar o tailwind
+alpinejs + livewire
