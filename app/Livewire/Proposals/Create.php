@@ -6,6 +6,7 @@ use App\Actions\ArrangePositions;
 use App\Models\Project;
 use App\Models\Proposal;
 use App\Notifications\NewProposal;
+use App\Notifications\OutbidNotification;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -60,7 +61,9 @@ class Create extends Component
 
     if ($orderProposal) {
       $proposal->update(['position_status' => 'up']);
-      Proposal::query()->where('id', '=', $orderProposal->id)->update(['position_status' => 'down']);
+      $oProposal = Proposal::find($orderProposal->id);
+      $oProposal->update(['position_status' => 'down']);
+      $oProposal->notify(new OutbidNotification($this->project));
     }
 
     ArrangePositions::run($proposal->project_id);
