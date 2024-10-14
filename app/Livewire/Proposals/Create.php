@@ -52,7 +52,7 @@ class Create extends Component
   public function arrangePositions(Proposal $proposal)
   {
     $query = DB::select('
-    select *, row_number() over (order by hours asc) as newPosition
+    select *, row_number() over (order by hours desc) as newPosition
     from proposals
     where project_id = :project
     ', ['project' => $proposal->project_id]);

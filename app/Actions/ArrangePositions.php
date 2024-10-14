@@ -10,7 +10,7 @@ class ArrangePositions
   {
     DB::update("
     with RankedProposals as (
-      select id, row_number() over(order by hours asc) as p
+      select id, row_number() over(order by hours desc) as p
       from proposals
       where project_id = :project
     )
